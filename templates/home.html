@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+
+    <h1>Welcome to the LOUIS POLICE</h1>
+    <form method="post" action="/">
+	<label for="motor">MOTOR:</label>
+	<input type="submit" name="action" value="motor">
+	<br>
+	<label for="video">START VIDEO:</label>
+	<input type="submit" name="action" value="startVideo" id="startVideoButton">
+	<label for="video">END VIDEO:</label>
+	<input type="submit" name="action" value="endVideo">
+    </form>	
+    <h1>LOUIS Stream</h1>
+    <img id="video-stream" src="" alt="WAITING TO SEE LOUIS...">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.1/socket.io.js"></script>
+    <script>
+	console.log('http://'+document.domain + ':'+location.port);
+
+	const socket = io.connect('http://'+document.domain + ':'+location.port);
+
+	socket.on('server_message',function(message){
+		console.log('Received from server:',message);	
+	});
+	const videoStream = document.getElementById('video-stream');
+
+	socket.on('video',function(data){
+		const imageData = btoa(String.fromCharCode(...new Uint8Array(data)));
+		const imageUrl = 'data:image/jpeg;base64,'+imageData;
+		videoStream.src = imageUrl;
+		
+	});
+
+	var startVideoButton = document.getElementById("startVideoButton");
+	startVideoButton.addEventListener("click",function(){
+		socket.emit('startVideo');
+	});
+
+   </script>
+</body>
+	
+</html>
