@@ -1,49 +1,70 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Document</title>
 </head>
+
 <body>
 
-    <h1>Welcome to the LOUIS POLICE</h1>
-    <form method="post" action="/">
-	<label for="motor">MOTOR:</label>
-	<input type="submit" name="action" value="motor">
-	<br>
-	<label for="video">START VIDEO:</label>
-	<input type="submit" name="action" value="startVideo" id="startVideoButton">
-	<label for="video">END VIDEO:</label>
-	<input type="submit" name="action" value="endVideo">
-    </form>	
-    <h1>LOUIS Stream</h1>
-    <img id="video-stream" src="" alt="WAITING TO SEE LOUIS...">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.1/socket.io.js"></script>
-    <script>
-	console.log('http://'+document.domain + ':'+location.port);
+	<h1>Welcome to the LOUIS POLICE</h1>
+	<form method="post" action="/">
+		<label for="motor">MOTOR:</label>
+		<input type="submit" name="action" value="motor">
+		<br>
+		<label for="video">START VIDEO:</label>
+		<input type="submit" name="action" value="startVideo" id="startVideoButton">
+		<label for="video">END VIDEO:</label>
+		<input type="submit" name="action" value="endVideo">
+	</form>
+	<h1>LOUIS Stream</h1>
+	<img id="video-stream" src="" alt="WAITING TO SEE LOUIS...">
 
-	const socket = io.connect('http://'+document.domain + ':'+location.port);
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.1/socket.io.js"></script>
 
-	socket.on('server_message',function(message){
-		console.log('Received from server:',message);	
-	});
-	const videoStream = document.getElementById('video-stream');
+	<script>
+		const socket = io.connect('http://' + document.domain + ':' + location.port);
 
-	socket.on('video',function(data){
-		const imageData = btoa(String.fromCharCode(...new Uint8Array(data)));
-		const imageUrl = 'data:image/jpeg;base64,'+imageData;
-		videoStream.src = imageUrl;
-		
-	});
 
-	var startVideoButton = document.getElementById("startVideoButton");
-	startVideoButton.addEventListener("click",function(){
-		socket.emit('startVideo');
-	});
+		socket.on('server_message', function (message) {
+			console.log('Received from server:', message);
+		});
 
-   </script>
+
+		const videoStream = document.getElementById('video-stream');
+		socket.on('serverVideo', function (data) {
+			//Process and play received server video
+			const imageData = btoa(String.fromCharCode(...new Uint8Array(data)));
+			const imageUrl = 'data:image/jpeg;base64,' + imageData;
+			videoStream.src = imageUrl;
+
+		});
+
+
+		socket.on('serverAudio', function (audioData) {
+			//Process and play received server audio 
+			const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+			audioContext.decodeAudioData(audioData.buffer, function (buffer) {
+				const source = audioContext.createBufferSource();
+				source.buffer = buffer;
+				source.connect(audioContext.destination); //connects to default output device
+				source.start();
+			});
+		});
+
+
+		var startVideoButton = document.getElementById("startVideoButton");
+		startVideoButton.addEventListener("click", function () {
+			//already sends a http POST request to server to start server video and audio transmission
+			//this function needs to load and send client audio to server  
+			//going to have to use web workers to perform audio tranmission on background thread
+			//should emit 'clientAudio' to server for processing
+		});
+
+	</script>
 </body>
-	
+
 </html>

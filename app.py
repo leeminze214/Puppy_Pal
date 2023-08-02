@@ -20,7 +20,7 @@ form_1 = pyaudio.paInt16 # 16-bit resolution
 chans = 1 # 1 channel
 samp_rate = 44100 # 44.1kHz sampling rate
 chunk = 4096 # 2^12 samples for buffer
-dev_index = 1 # device index found by p.get_device_info_by_index(ii)
+dev_index = 1 # usb mic index id
 
 app =Flask(__name__)
 app.config['SECRET_KEY'] = 'secret'
@@ -38,6 +38,7 @@ def handle_disconnect():
     print('Client disconnected: '+request.sid)
 
 
+#-----------------------------------------loading stream audio and video-----------------------------------------
 def audio_stream():
     global video_stream_state
     global audio_frame_queue
@@ -86,6 +87,7 @@ def video_stream():
             print("loading video frames")
         
 
+#-----------------------------------------emitting stream audio and video to client-----------------------------------------
 def emit_video_frames():
     global video_stream_state
     global video_frame_queue
@@ -94,12 +96,13 @@ def emit_video_frames():
         try:
             print("emitting video frames")
             video_frame = video_frame_queue.get(timeout=1)
-            socketio.emit('video',video_frame)#,namespace='/')
+            socketio.emit('serverVideo',video_frame)#,namespace='/')
         except queue.Empty:
             print("empty video queue")
             #for some reasons if video stops tranmission
             pass
         
+
 def emit_audio_frames():
     global video_stream_state
     global audio_frame_queue
@@ -108,18 +111,28 @@ def emit_audio_frames():
         try:
             print("emitting audio frames")
             audio_frame = audio_frame_queue.get(timeout=1)
-            socketio.emit('audio',audio_frame),#namespace='/')
+            socketio.emit('serverAudio',audio_frame),#namespace='/')
         except queue.Empty:
             print("empty audio queue")
             #for some reasons if video stops tranmission
             pass 
-        
+
+
+#-----------------------------------------receive and process client audio frames---------------------------------------
+socketio.on('clientAudio')
+def process_client_audio(audio_frame):
+    pass
+
+
+
+
 @app.route('/', methods=["GET", "POST"])
 def home():
     global video_stream_state                   
     if request.method == 'POST':
         action = request.form.get('action')
         print(action)
+
         if action == 'motor':
             print("motor starting")
             GPIO.output(motorPin,GPIO.HIGH)
@@ -127,6 +140,7 @@ def home():
             sleep(1)
             GPIO.output(motorPin,GPIO.LOW)
             print("state is:",GPIO.input(motorPin))
+
         elif action == 'startVideo':
             print("video starting")
             video_stream_state = True
@@ -134,14 +148,12 @@ def home():
             socketio.start_background_task(audio_stream)
             socketio.start_background_task(emit_video_frames)
             socketio.start_background_task(emit_audio_frames)
+
         elif action == 'endVideo':
             print("video ending")
             video_stream_state = False
         
-            
     return render_template('home.html')
-
-
 
 
 if __name__=="__main__":
