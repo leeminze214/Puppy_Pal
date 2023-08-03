@@ -1,7 +1,7 @@
 const socket = io.connect('http://' + document.domain + ':' + location.port);
 const videoStream = document.getElementById('video-stream');
 const startVideoButton = document.getElementById('startVideoButton');
-const audioWorker = new Worker('C:\Users\leemi\Documents\code\louis_pal\static\audioWorker.js');
+const audioWorker = new Worker('\static\audioWorker.js');
 const testButton = document.getElementById('testing');
 
 audioWorker.onmessage = function (event) {
