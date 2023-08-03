@@ -11,6 +11,7 @@
 <body>
 
 	<h1>Welcome to the LOUIS POLICE</h1>
+	<button id="testing">testing purposes!</button>
 	<form method="post" action="/">
 		<label for="motor">MOTOR:</label>
 		<input type="submit" name="action" value="motor">
@@ -24,47 +25,113 @@
 	<img id="video-stream" src="" alt="WAITING TO SEE LOUIS...">
 
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.1/socket.io.js"></script>
-
-	<script>
-		const socket = io.connect('http://' + document.domain + ':' + location.port);
-
-
-		socket.on('server_message', function (message) {
-			console.log('Received from server:', message);
-		});
-
-
-		const videoStream = document.getElementById('video-stream');
-		socket.on('serverVideo', function (data) {
-			//Process and play received server video
-			const imageData = btoa(String.fromCharCode(...new Uint8Array(data)));
-			const imageUrl = 'data:image/jpeg;base64,' + imageData;
-			videoStream.src = imageUrl;
-
-		});
-
-
-		socket.on('serverAudio', function (audioData) {
-			//Process and play received server audio 
-			const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-			audioContext.decodeAudioData(audioData.buffer, function (buffer) {
-				const source = audioContext.createBufferSource();
-				source.buffer = buffer;
-				source.connect(audioContext.destination); //connects to default output device
-				source.start();
-			});
-		});
-
-
-		var startVideoButton = document.getElementById("startVideoButton");
-		startVideoButton.addEventListener("click", function () {
-			//already sends a http POST request to server to start server video and audio transmission
-			//this function needs to load and send client audio to server  
-			//going to have to use web workers to perform audio tranmission on background thread
-			//should emit 'clientAudio' to server for processing
-		});
-
-	</script>
+	<script src="../static/client.js"></script>
 </body>
 
 </html>
+
+
+You are correct that `async/await` won't provide true parallel processing in JavaScript due to its single-threaded
+nature. If you need to achieve parallel processing for video and audio tasks, you might consider using a combination of
+techniques, including Web Workers and careful management of asynchronous operations. Here's a more detailed approach:
+
+1. **Web Workers for Parallelism:**
+
+Use Web Workers to achieve parallel processing for CPU-intensive tasks like video and audio processing. Web Workers
+allow you to run scripts in the background, freeing up the main thread for other tasks. You can create a Web Worker for
+video processing and another for audio processing.
+
+2. **Task Coordination:**
+
+Use message passing to communicate between the main thread and the Web Workers. Send chunks of data to the Web Workers
+for processing, and receive the processed results back.
+
+3. **Main Thread:**
+
+In the main thread, you can handle tasks that don't require parallel processing, such as UI interactions, user input,
+and sending/receiving data over the network.
+
+4. **Web Worker Code:**
+
+Inside the Web Workers, you can use asynchronous techniques like Promises and event listeners to manage the processing
+tasks and communicate back to the main thread.
+
+Here's a simplified example of how you could structure your code:
+
+```javascript
+// Main thread
+const videoWorker = new Worker('video-worker.js');
+const audioWorker = new Worker('audio-worker.js');
+
+function handleReceivedData(data) {
+const { videoData, audioData } = data;
+
+// Send data to workers for parallel processing
+videoWorker.postMessage({ type: 'processVideo', data: videoData });
+audioWorker.postMessage({ type: 'processAudio', data: audioData });
+
+// Continue with other tasks on the main thread
+}
+
+// Handle messages from workers
+videoWorker.addEventListener('message', (event) => {
+if (event.data.type === 'videoProcessed') {
+const processedVideoData = event.data.result;
+// Handle processed video data
+}
+});
+
+audioWorker.addEventListener('message', (event) => {
+if (event.data.type === 'audioProcessed') {
+const processedAudioData = event.data.result;
+// Handle processed audio data
+}
+});
+```
+
+```javascript
+// video-worker.js
+self.addEventListener('message', (event) => {
+if (event.data.type === 'processVideo') {
+const videoData = event.data.data;
+// Process video data in parallel
+const processedVideoData = processVideo(videoData);
+// Send result back to the main thread
+self.postMessage({ type: 'videoProcessed', result: processedVideoData });
+}
+});
+
+function processVideo(videoData) {
+// Process video data
+// ...
+return processedVideoData;
+}
+```
+
+```javascript
+// audio-worker.js
+self.addEventListener('message', (event) => {
+if (event.data.type === 'processAudio') {
+const audioData = event.data.data;
+// Process audio data in parallel
+const processedAudioData = processAudio(audioData);
+// Send result back to the main thread
+self.postMessage({ type: 'audioProcessed', result: processedAudioData });
+}
+});
+
+function processAudio(audioData) {
+// Process audio data
+// ...
+return processedAudioData;
+}
+```
+
+In this example, the main thread handles UI interactions and task coordination, while the Web Workers (`video-worker.js`
+and `audio-worker.js`) handle parallel processing of video and audio data, respectively. The use of Web Workers allows
+these processing tasks to occur concurrently without blocking the main thread. Communication between the main thread and
+the Web Workers is achieved through message passing.
+
+Please note that Web Workers have their limitations and complexities, and proper handling of data synchronization,
+worker termination, error handling, and message passing is crucial for a robust implementation. Additionally, browser
+compatibility and security considerations should be taken into account.
