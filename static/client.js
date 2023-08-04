@@ -29,7 +29,8 @@ videoWorker.onmessage = function (event) {
 
 socket.on('serverAudio', function (audioData) {
     //Process and play received server audio 
-    audioContext.decodeAudioData(audioData.buffer, function (buffer) {
+    const arrayBuffer = new Uint8Array(audioData).buffer;
+    audioContext.decodeAudioData(arrayBuffer, function (buffer) {
         const source = audioContext.createBufferSource();
         source.buffer = buffer;
         source.connect(audioContext.destination); //connects to default output device
