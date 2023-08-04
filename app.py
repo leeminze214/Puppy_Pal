@@ -15,7 +15,9 @@ GPIO.output(motorPin, GPIO.LOW)
 
 video_stream_state = False
 video_frame_queue = queue.Queue()
+
 audio_frame_queue = queue.Queue()
+client_audio_frame_queue = queue.Queue()
 form_1 = pyaudio.paInt16 # 16-bit resolution
 chans = 1 # 1 channel
 samp_rate = 44100 # 44.1kHz sampling rate
@@ -115,16 +117,34 @@ def emit_audio_frames():
         except queue.Empty:
             print("empty audio queue")
             #for some reasons if video stops tranmission
-            pass 
+             
 
 
 #-----------------------------------------receive and process client audio frames---------------------------------------
 socketio.on('clientAudio')
-def process_client_audio(audio_frame):
-    pass
+def load_client_audio(audio_frame):
+    client_audio_frame_queue.put(audio_frame)
 
 
+def process_client_audio():
+    global client_audio_frame_queue
 
+    audio = pyaudio.PyAudio()
+    audio_stream = audio.open(format=form_1,
+                              channels=chans,
+                              rate=samp_rate,
+                              output=True)
+    while video_stream_state == True:
+        try:
+            audio_frame = client_audio_frame_queue.get(timeout = 1)
+            audio_stream.write(audio_frame)
+        except queue.Empty:
+            print("client audio queue empty")
+
+    audio_stream.stop_stream()
+    audio_stream.close()
+
+#-------------------------------------------routes--------------------------------------------
 
 @app.route('/', methods=["GET", "POST"])
 def home():
@@ -144,6 +164,7 @@ def home():
         elif action == 'startVideo':
             print("video starting")
             video_stream_state = True
+            
             socketio.start_background_task(video_stream)
             socketio.start_background_task(audio_stream)
             socketio.start_background_task(emit_video_frames)
