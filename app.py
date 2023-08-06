@@ -22,7 +22,7 @@ form_1 = pyaudio.paInt16 # 16-bit resolution
 chans = 1 # 1 channel
 samp_rate = 44100 # 44.1kHz sampling rate
 chunk = 4096 # 2^12 samples for buffer
-dev_index = "hw:2,0" # usb mic index id
+dev_index = 0 # usb mic index id
 
 app =Flask(__name__)
 app.config['SECRET_KEY'] = 'secret'
