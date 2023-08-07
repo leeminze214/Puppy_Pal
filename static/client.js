@@ -29,6 +29,7 @@ videoWorker.onmessage = function (event) {
 
 socket.on('serverAudio', function (audioData) {
     //Process and play received server audio 
+    print("playing server audio")
     const arrayBuffer = new Uint8Array(audioData).buffer;
     audioContext.decodeAudioData(arrayBuffer, function (buffer) {
         const source = audioContext.createBufferSource();
@@ -38,7 +39,7 @@ socket.on('serverAudio', function (audioData) {
     });
 });
 
-
+/*
 testButton.addEventListener("click", function () {
     //this function accesses user mic and sends client audio to server  
     navigator.mediaDevices.getUserMedia({ audio: true })//request access for mic
@@ -66,7 +67,7 @@ endVideoButton.addEventListener("click", function () {
     }
     mediaRecorder = null;
 });
-
+*/
 
 
 

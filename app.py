@@ -41,29 +41,8 @@ def handle_disconnect():
     print('Client disconnected: '+request.sid)
 
 
-#-----------------------------------------loading stream audio and video-----------------------------------------
-def audio_stream():
-    global video_stream_state
-    global audio_frame_queue
-    try:
-        audio
-    except NameError:
-        audio = pyaudio.PyAudio()
-    
-    stream = audio.open(format = form_1,rate = samp_rate,channels = chans, \
-                    input_device_index = dev_index,input = True, \
-                    frames_per_buffer=chunk)
-    try:
-        while video_stream_state == True:
-            audio_frame = stream.read(chunk)#this automaticallyy reads next chunk of data in stream
-            sleep(0.05)
-            audio_frame_queue.put(audio_frame)
-            print("loading audio frames")
-    except KeyboardInterrupt:
-        pass
-    stream.stop_stream()
-    stream.close()
-    audio.terminate()
+#-----------------------------------------video-----------------------------------------
+
     
     
 def video_stream():
@@ -89,8 +68,6 @@ def video_stream():
             sleep(0.05)
             print("loading video frames")
         
-
-#-----------------------------------------emitting stream audio and video to client-----------------------------------------
 def emit_video_frames():
     global video_stream_state
     global video_frame_queue
@@ -105,6 +82,31 @@ def emit_video_frames():
             #for some reasons if video stops tranmission
             pass
         
+
+#-----------------------------------------audio-----------------------------------------
+def audio_stream():
+    global video_stream_state
+    global audio_frame_queue
+    try:
+        audio
+    except NameError:
+        audio = pyaudio.PyAudio()
+    
+    stream = audio.open(format = form_1,rate = samp_rate,channels = chans, \
+                    input_device_index = dev_index,input = True, \
+                    frames_per_buffer=chunk)
+    try:
+        while video_stream_state == True:
+            audio_frame = stream.read(chunk)#this automaticallyy reads next chunk of data in stream
+            sleep(0.05)
+            audio_frame_queue.put(audio_frame)
+            print("loading audio frames")
+    except KeyboardInterrupt:
+        pass
+    stream.stop_stream()
+    stream.close()
+    audio.terminate()
+
 
 def emit_audio_frames():
     global video_stream_state
@@ -122,6 +124,7 @@ def emit_audio_frames():
 
 
 #-----------------------------------------receive and process client audio frames---------------------------------------
+"""
 socketio.on('clientAudio')
 def load_client_audio(audio_frame):
     client_audio_frame_queue.put(audio_frame)
@@ -144,7 +147,7 @@ def process_client_audio():
 
     audio_stream.stop_stream()
     audio_stream.close()
-
+"""
 #-------------------------------------------routes--------------------------------------------
 
 @app.route('/', methods=["GET", "POST"])
@@ -170,10 +173,10 @@ def home():
 
         elif action == 'testAudio':
             print("testing audio")
-            temp_audio_stream = True
+            #temp_audio_stream = True
             socketio.start_background_task(audio_stream)
             socketio.start_background_task(emit_audio_frames)
-            socketio.start_background_task(process_client_audio)
+            #socketio.start_background_task(process_client_audio)
             
 
         elif action == 'endVideo':
