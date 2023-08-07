@@ -39,7 +39,7 @@ socket.on('serverAudio', function (audioData) {
 });
 
 
-startVideoButton.addEventListener("click", function () {
+testButton.addEventListener("click", function () {
     //this function accesses user mic and sends client audio to server  
     navigator.mediaDevices.getUserMedia({ audio: true })//request access for mic
         .then(stream => {

@@ -23,6 +23,7 @@ chans = 1 # 1 channel
 samp_rate = 44100 # 44.1kHz sampling rate
 chunk = 4096 # 2^12 samples for buffer
 dev_index = 2 # usb mic index id
+temp_audio_stream=False
 
 app =Flask(__name__)
 app.config['SECRET_KEY'] = 'secret'
@@ -128,13 +129,13 @@ def load_client_audio(audio_frame):
 
 def process_client_audio():
     global client_audio_frame_queue
-
+    global temp_audio_stream
     audio = pyaudio.PyAudio()
     audio_stream = audio.open(format=form_1,
                               channels=chans,
                               rate=samp_rate,
                               output=True)
-    while video_stream_state == True:
+    while temp_audio_stream == True:#CHANGE THIS TO VIDEO STATE LATERRR
         try:
             audio_frame = client_audio_frame_queue.get(timeout = 1)
             audio_stream.write(audio_frame)
@@ -164,11 +165,16 @@ def home():
         elif action == 'startVideo':
             print("video starting")
             video_stream_state = True
-            
             socketio.start_background_task(video_stream)
-            socketio.start_background_task(audio_stream)
             socketio.start_background_task(emit_video_frames)
+
+        elif action == 'testAudio':
+            print("testing audio")
+            temp_audio_stream = True
+            socketio.start_background_task(audio_stream)
             socketio.start_background_task(emit_audio_frames)
+            socketio.start_background_task(process_client_audio)
+            
 
         elif action == 'endVideo':
             print("video ending")
