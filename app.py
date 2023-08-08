@@ -22,7 +22,7 @@ form_1 = pyaudio.paInt16 # 16-bit resolution
 chans = 1 # 1 channel
 samp_rate = 44100 # 44.1kHz sampling rate
 chunk = 4096 # 2^12 samples for buffer
-dev_index = 2 # usb mic index id
+dev_index = 1 # usb mic index id
 temp_audio_stream=False
 
 app =Flask(__name__)
@@ -174,6 +174,7 @@ def home():
         elif action == 'testAudio':
             print("testing audio")
             #temp_audio_stream = True
+            video_stream_state = True
             socketio.start_background_task(audio_stream)
             socketio.start_background_task(emit_audio_frames)
             #socketio.start_background_task(process_client_audio)
