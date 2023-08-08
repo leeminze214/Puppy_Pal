@@ -4,6 +4,7 @@ const startVideoButton = document.getElementById('startVideoButton');
 const endVideoButton = document.getElementById('endVideoButton');
 const videoWorker = new Worker('/static/videoWorker.js');
 const testButton = document.getElementById('testing');
+const testAudioButton = document.getElementById('testAudioButton');
 const audioContext = new (window.AudioContext || window.webkitAudioContext)(); //can be optimized by terminating after use
 let mediaRecorder;
 
@@ -40,7 +41,7 @@ socket.on('serverAudio', function (audioData) {
 });
 */
 
-testButton.addEventListener("click", function () {
+testAudioButton.addEventListener("click", function () {
     //this function accesses user mic and sends client audio to server  
     console.log("starting audio");
     navigator.mediaDevices.getUserMedia({ audio: true })//request access for mic
@@ -67,14 +68,5 @@ endVideoButton.addEventListener("click", function () {
         mediaRecorder.stop();
     }
     mediaRecorder = null;
-});
-
-
-
-
-
-testButton.addEventListener("click", function () {
-    videoWorker.postMessage('test');
-    console.log("posting message to worker");
 });
 
