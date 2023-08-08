@@ -124,7 +124,7 @@ def emit_audio_frames():
 
 
 #-----------------------------------------receive and process client audio frames---------------------------------------
-"""
+
 socketio.on('clientAudio')
 def load_client_audio(audio_frame):
     client_audio_frame_queue.put(audio_frame)
@@ -133,6 +133,7 @@ def load_client_audio(audio_frame):
 def process_client_audio():
     global client_audio_frame_queue
     global temp_audio_stream
+
     audio = pyaudio.PyAudio()
     audio_stream = audio.open(format=form_1,
                               channels=chans,
@@ -142,12 +143,13 @@ def process_client_audio():
         try:
             audio_frame = client_audio_frame_queue.get(timeout = 1)
             audio_stream.write(audio_frame)
+            print("playing client audio")
         except queue.Empty:
             print("client audio queue empty")
 
     audio_stream.stop_stream()
     audio_stream.close()
-"""
+
 #-------------------------------------------routes--------------------------------------------
 
 @app.route('/', methods=["GET", "POST"])
@@ -172,13 +174,16 @@ def home():
             socketio.start_background_task(emit_video_frames)
 
         elif action == 'testAudio':
+            temp_audio_stream = True
             print("testing audio")
+            """
             #temp_audio_stream = True
             video_stream_state = True
             socketio.start_background_task(audio_stream)
             socketio.start_background_task(emit_audio_frames)
-            #socketio.start_background_task(process_client_audio)
-            
+            """
+            socketio.start_background_task(process_client_audio)
+
 
         elif action == 'endVideo':
             print("video ending")

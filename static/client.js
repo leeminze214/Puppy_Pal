@@ -26,7 +26,7 @@ videoWorker.onmessage = function (event) {
     videoStream.src = imageUrl;
 };
 
-
+/*
 socket.on('serverAudio', function (audioData) {
     //Process and play received server audio 
     print("playing server audio")
@@ -38,8 +38,8 @@ socket.on('serverAudio', function (audioData) {
         source.start();
     });
 });
+*/
 
-/*
 testButton.addEventListener("click", function () {
     //this function accesses user mic and sends client audio to server  
     navigator.mediaDevices.getUserMedia({ audio: true })//request access for mic
@@ -54,7 +54,7 @@ testButton.addEventListener("click", function () {
             mediaRecorder.start();
         })
         .catch(error => {
-            console.error('Error accessing microphone:'.error);
+            console.error('Error accessing microphone!!!:'.error);
         });
 });
 
@@ -67,7 +67,7 @@ endVideoButton.addEventListener("click", function () {
     }
     mediaRecorder = null;
 });
-*/
+
 
 
 
