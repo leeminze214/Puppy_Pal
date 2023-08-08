@@ -134,7 +134,7 @@ def load_client_audio(audio_frame):
 def process_client_audio():
     global client_audio_frame_queue
     global temp_audio_stream
-
+    
     audio = pyaudio.PyAudio()
     audio_stream = audio.open(format=form_1,
                               channels=chans,

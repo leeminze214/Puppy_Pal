@@ -5,7 +5,7 @@ const endVideoButton = document.getElementById('endVideoButton');
 const videoWorker = new Worker('/static/videoWorker.js');
 const testButton = document.getElementById('testing');
 const testAudioButton = document.getElementById('testAudioButton');
-const audioContext = new (window.AudioContext || window.webkitAudioContext)(); //can be optimized by terminating after use
+//const audioContext = new (window.AudioContext || window.webkitAudioContext)(); //can be optimized by terminating after use
 let mediaRecorder;
 
 
@@ -41,26 +41,31 @@ socket.on('serverAudio', function (audioData) {
 });
 */
 
-testAudioButton.addEventListener("click", function () {
+testAudioButton.addEventListener("click", async () => {
     //this function accesses user mic and sends client audio to server  
     console.log("starting audio");
-    navigator.mediaDevices.getUserMedia({ audio: true })//request access for mic
-        .then(stream => {
-            mediaRecorder = new MediaRecorder(stream);//create mediarecorder object that allows u to access mic data
-            mediaRecorder.ondataavailable = event => {
-                if (event.data.size > 0) {
-                    socket.emit('clientAudio', event.data);
-                    console.log("transmitting audio");
-                }
-            };
-            mediaRecorder.start();
-        })
-        .catch(error => {
-            console.error('Error accessing microphone!!!:', error);
-        });
+    try {
+        const stream = navigator.mediaDevices.getUserMedia({ audio: true });//request access for mic
+        let mediaRecorder = new MediaRecorder(stream);
+        //create mediarecorder object that allows u to access mic data
+        mediaRecorder.ondataavailable = event => {
+            if (event.data.size > 0) {
+                socket.send(event.data);
+                console.log("Transmitting audio");
+            }
+
+        };
+        mediaRecorder.start();
+        console.log("starting microphone")
+    }
+    catch (error) {
+        console.error('Error accessing microphone!!!:', error);
+    };
 });
 
+testButton.addEventListener("click", function () {
 
+});
 endVideoButton.addEventListener("click", function () {
     //this ends user audio tranmission
     if (mediaRecorder && mediaRecorder.state === 'recording') {
