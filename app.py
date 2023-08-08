@@ -127,6 +127,7 @@ def emit_audio_frames():
 
 socketio.on('clientAudio')
 def load_client_audio(audio_frame):
+    print("adding to client audio queue")
     client_audio_frame_queue.put(audio_frame)
 
 
@@ -140,6 +141,7 @@ def process_client_audio():
                               rate=samp_rate,
                               output=True)
     while temp_audio_stream == True:#CHANGE THIS TO VIDEO STATE LATERRR
+        print("loop")
         try:
             audio_frame = client_audio_frame_queue.get(timeout = 1)
             audio_stream.write(audio_frame)
@@ -157,7 +159,6 @@ def home():
     global video_stream_state                   
     if request.method == 'POST':
         action = request.form.get('action')
-        print(action)
 
         if action == 'motor':
             print("motor starting")

@@ -42,6 +42,7 @@ socket.on('serverAudio', function (audioData) {
 
 testButton.addEventListener("click", function () {
     //this function accesses user mic and sends client audio to server  
+    console.log("starting audio");
     navigator.mediaDevices.getUserMedia({ audio: true })//request access for mic
         .then(stream => {
             mediaRecorder = new MediaRecorder(stream);//create mediarecorder object that allows u to access mic data
@@ -54,7 +55,7 @@ testButton.addEventListener("click", function () {
             mediaRecorder.start();
         })
         .catch(error => {
-            console.error('Error accessing microphone!!!:'.error);
+            console.error('Error accessing microphone!!!:', error);
         });
 });
 
