@@ -98,7 +98,7 @@ def audio_stream():
     try:
         while video_stream_state == True:
             audio_frame = stream.read(chunk)#this automaticallyy reads next chunk of data in stream
-            sleep(0.05)
+            sleep(0.2)
             audio_frame_queue.put(audio_frame)
             print("loading audio frames")
     except KeyboardInterrupt:
