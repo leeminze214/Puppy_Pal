@@ -45,8 +45,9 @@ testAudioButton.addEventListener("click", async () => {
     //this function accesses user mic and sends client audio to server  
     console.log("starting audio");
     try {
+        console.log("before await");
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });//request access for mic
-        console.log("first");
+        console.log("after await");
         mediaRecorder = new MediaRecorder(stream);
         console.log("second");
         //create mediarecorder object that allows u to access mic data
