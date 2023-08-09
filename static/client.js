@@ -46,7 +46,9 @@ testAudioButton.addEventListener("click", async () => {
     console.log("starting audio");
     try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });//request access for mic
+        console.log("first");
         mediaRecorder = new MediaRecorder(stream);
+        console.log("second");
         //create mediarecorder object that allows u to access mic data
         mediaRecorder.ondataavailable = event => {
             if (event.data.size > 0) {
